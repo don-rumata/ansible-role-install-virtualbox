@@ -5,27 +5,21 @@
     return_content: yes
   delegate_to: localhost
   register: virtualbox_available_version
-
-
-
+#---
 - name: Set facts about available virtualbox version part 1
   block:
     - set_fact:
         virtualbox_available_version_fact: "{{ virtualbox_available_version.content | trim }}"
     - set_fact:
         virtualbox_available_major_and_minor_version_fact: "{{ virtualbox_available_version_fact.split('.', 2)[:-1] | join('.') }}"
-
-
-
+#---
 - name: Get VirtualBox checksum content
   uri:
     url: '{{ virtualbox_checksum_file_url }}'
     return_content: yes
   register: virtualbox_checksum_file_content
   delegate_to: localhost
-
-
-
+#---
 - name: Set facts about available virtualbox version part 2
   block:
     - set_fact:
@@ -40,9 +34,7 @@
         virtualbox_full_available_extpack_version_fact: '{{ virtualbox_full_available_version_fact }}'
     - set_fact:
         virtualbox_extpack_direct_download_url_fact: '{{ virtualbox_url_path_to_files }}/{{ virtualbox_available_extpack_filename_fact }}'
-
-
-
+#---
 - name: Set facts about Windows only VirtualBox info
   when: ansible_os_family == 'Windows'
   block:
@@ -54,9 +46,7 @@
         virtualbox_win_path_to_exe_fact: '{{ ansible_env.ProgramFiles }}\Oracle\VirtualBox\VirtualBox.exe'
     - set_fact:
         virtualbox_direct_download_url_fact: '{{ virtualbox_url_path_to_files }}/{{ virtualbox_installer_file_fact }}'
-
-
-
+#---
 - name: Get VirtualBox exe version
   when: ansible_os_family == 'Windows'
   become: yes
@@ -70,18 +60,14 @@
         path: "{{ virtualbox_win_path_to_exe_fact }}"
       register: virtualbox_exe_file_version
       when: virtualbox_exe.stat.exists == 'true'
-
-
-
+#---
 - name: Get VirtualBox bin status 4 Linux
   when: ansible_system == 'Linux'
   become: yes
   stat:
     path: /usr/bin/VBoxManage
   register: virtualbox_bin
-
-
-
+#---
 - name: Set facts about installed virtualbox 4 Windows
   when:
     - ansible_os_family == 'Windows'
@@ -98,9 +84,7 @@
     - set_fact:
         virtualbox_exe_version_fact: 0
       when: virtualbox_exe_state_fact == 'absent'
-
-
-
+#---
 - name: Set facts about installed virtualbox 4 Windows
   when: ansible_system == 'Linux'
   block:
@@ -110,9 +94,7 @@
     - set_fact:
         virtualbox_bin_state_fact: absent
       when: virtualbox_bin.stat.exists == 'false'
-
-
-
+#---
 - name: Get facts about Extension Pack 4 Windows
   when:
     - ansible_os_family == 'Windows'
@@ -123,9 +105,7 @@
   win_shell: VBoxManage list extpacks
   register: vboxmanage_list_extpacks_windows
   changed_when: vboxmanage_list_extpacks_windows.rc != 0
-
-
-
+#---
 - name: Get facts about Extension Pack 4 Linux
   when:
     - ansible_system == 'Linux'
@@ -134,9 +114,7 @@
   command: VBoxManage list extpacks
   register: vboxmanage_list_extpacks_linux
   changed_when: vboxmanage_list_extpacks_linux.rc != 0
-
-
-
+#---
 - name: Set facts about Extension Pack
   vars:
     # VERY dirty hacks. TODO!
@@ -230,9 +208,7 @@
         - ansible_system == 'Linux'
         - virtualbox_bin_state_fact == 'present'
         - virtualbox_installed_extpack_numbers_fact != 0
-
-
-
+#---
 # - name: Run module "setup"
 #   setup:
 # #   register: facts_from_setup

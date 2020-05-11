@@ -12,9 +12,7 @@
     - virtualbox
     - repo
     - add
-
-
-
+#---
 - name: Add repo GPG key
   apt_key:
     url: "{{ item }}"
@@ -30,6 +28,3 @@
     - repo
     - key
     - gpg
-
-
-

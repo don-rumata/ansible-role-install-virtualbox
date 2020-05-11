@@ -9,9 +9,7 @@
   become_flags: logon_type=new_credentials logon_flags=netcredentials_only
   block:
     - win_shell: 'echo y | VBoxManage extpack install --replace {{ virtualbox_windows_local_download_path }}\{{ virtualbox_available_extpack_filename_fact }}'
-
-
-
+#---
 - name: Install\Update VirtualBox Extension Pack 4 Linux
   when: ansible_system == 'Linux'
   become: yes

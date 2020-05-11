@@ -22,8 +22,7 @@
     - win_file:
         path: '{{ virtualbox_windows_local_download_path }}'
         state: absent
-
-
+#---
 - name: Install VirtualBox 4 Debian\Ubuntu
   when:
     - ansible_os_family == 'Debian'
@@ -37,9 +36,7 @@
     install_recommends: yes
   notify:
     - run-vboxconfig
-
-
-
+#---
 - name: Install VirtualBox 4 enterprise RHEL-like
   when:
     - ansible_os_family == 'RedHat'
@@ -55,9 +52,7 @@
     state: present
   notify:
     - run-vboxconfig
-
-
-
+#---
 # TODO
 # - name: Install VirtualBox 4 OpenSUSE Tumbleweed
 #   when:

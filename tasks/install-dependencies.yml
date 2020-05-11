@@ -13,9 +13,7 @@
         name:
           - libselinux-python3
         state: present
-
-
-
+#---
 # TODO.
 # # https://www.tecmint.com/install-virtualbox-in-opensuse/
 # - name: Install dependencies 4 OpenSUSE Tumbleweed

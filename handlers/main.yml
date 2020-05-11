@@ -5,8 +5,6 @@
   become: yes
   command: vboxconfig
 
-
-
 - name: update-apt-repo-cache
   when:
     - ansible_os_family == 'Debian'

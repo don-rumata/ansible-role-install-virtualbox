@@ -1,0 +1,37 @@
+---
+- name: Install dependencies 4 enterprise RHEL-like
+  when:
+    - ansible_os_family == 'RedHat'
+    - ansible_pkg_mgr == 'yum'
+  become: yes
+  vars:
+    # https://stackoverflow.com/a/47091066/5430535
+    # https://github.com/ansible/ansible/issues/32532#issuecomment-341641007
+    ansible_python_interpreter: /usr/bin/python2.7
+  block:
+    - yum:
+        name:
+          - libselinux-python3
+        state: present
+
+
+
+# TODO.
+# # https://www.tecmint.com/install-virtualbox-in-opensuse/
+# - name: Install dependencies 4 OpenSUSE Tumbleweed
+#   when:
+#     - ansible_system == 'Linux'
+#     - ansible_os_family == 'Suse'
+#     - ansible_distribution == 'openSUSE Tumbleweed'
+#     - ansible_pkg_mgr == 'zypper'
+#   become: yes
+#   zypper:
+#     name:
+#       - virtualbox-host-source
+#       - kernel-devel
+#       - kernel-default-devel
+#       - gcc
+#       - make
+#       - perl
+#       - dkms
+#     state: present

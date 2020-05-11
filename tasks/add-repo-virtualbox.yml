@@ -1,0 +1,102 @@
+---
+- name: Add repo VirtualBox 4 Debian\Ubuntu
+  when:
+    - ansible_os_family == 'Debian'
+    - ansible_pkg_mgr == 'apt'
+    - ansible_architecture == 'x86_64'
+  become: yes
+  block:
+    - apt_repository:
+        repo: 'deb [arch=amd64] {{ http_or_https }}://download.virtualbox.org/virtualbox/debian {{ ansible_distribution_release }} contrib non-free'
+        state: present
+        filename: virtualbox
+        update_cache: no
+      register: add_repo
+    - apt_key:
+        url: "{{ item }}"
+        state: present
+      with_items:
+        - https://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc
+        - https://www.virtualbox.org/download/oracle_vbox.asc
+        - https://download.virtualbox.org/virtualbox/debian/oracle_vbox_2016.asc
+    - apt:
+        update_cache: yes
+      when: add_repo.changed == true
+  tags:
+    - linux
+    - ubuntu
+    - virtualbox
+    - repo
+
+
+
+# TODO.
+# - name: Add repo VirtualBox 4 Fedora
+#   when: 
+#     - ansible_os_family == 'RedHat'
+#     - ansible_pkg_mgr == 'dnf'
+#   become: yes
+#   block:
+#     - yum_repository:
+#         file: virtualbox
+#         name: virtualbox
+#         description: Fedora $releasever - $basearch
+#         baseurl: '{{ http_or_https }}://download.virtualbox.org/virtualbox/rpm/fedora/$releasever/$basearch'
+#         gpgkey: https://www.virtualbox.org/download/oracle_vbox.asc
+#         enabled: yes
+#         gpgcheck: yes
+#         state: present
+#   tags:
+#     - linux
+#     - fedora
+#     - virtualbox
+#     - repo
+#     - config
+
+
+
+- name: Add repo VirtualBox 4 CentOS\RHEL
+  when: 
+    - ansible_os_family == 'RedHat'
+    - ansible_pkg_mgr == 'yum'
+  become: yes
+  block:
+    - yum_repository:
+        file: virtualbox
+        name: virtualbox
+        description: Oracle Linux / RHEL / CentOS-$releasever / $basearch - VirtualBox
+        baseurl: '{{ http_or_https }}://download.virtualbox.org/virtualbox/rpm/el/$releasever/$basearch'
+        gpgkey: https://www.virtualbox.org/download/oracle_vbox.asc
+        enabled: yes
+        gpgcheck: yes
+        state: present
+  tags:
+    - linux
+    - centos
+    - virtualbox
+    - repo
+    - config
+
+
+# TODO
+# # https://ru.opensuse.org/SDB:%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0_VirtualBox
+# - name: Add repo VirtualBox 4 OpenSUSE Tumbleweed
+#   when:
+#     - ansible_os_family == 'Suse'
+#     - ansible_distribution == 'openSUSE Tumbleweed'
+#     - ansible_pkg_mgr == 'zypper'
+#   become: yes
+#   block:
+#     - zypper_repository:
+#         # repo: http://download.virtualbox.org/virtualbox/rpm/opensuse/virtualbox.repo
+#         name: virtualbox
+#         repo: http://download.virtualbox.org/virtualbox/rpm/opensuse/$releasever/$basearch
+#         auto_import_keys: yes
+#         state: present
+#   tags:
+#     - linux
+#     - suse
+#     - opensuse
+#     - virtualbox
+#     - repo
+#     - config

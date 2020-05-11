@@ -1,0 +1,22 @@
+---
+# https://forums.virtualbox.org/viewtopic.php?f=6&t=82761#p391279
+- name: Install\Update VirtualBox Extension Pack 4 Windows
+  when:
+    - ansible_os_family == 'Windows'
+    - ansible_env.PROCESSOR_ARCHITECTURE == 'AMD64'
+  become: yes
+  become_method: runas
+  become_flags: logon_type=new_credentials logon_flags=netcredentials_only
+  block:
+    - win_shell: 'echo y | VBoxManage extpack install --replace {{ virtualbox_windows_local_download_path }}\{{ virtualbox_available_extpack_filename_fact }}'
+
+
+
+- name: Install\Update VirtualBox Extension Pack 4 Linux
+  when: ansible_system == 'Linux'
+  become: yes
+  block:
+    - shell: yes | VBoxManage extpack install --replace /tmp/{{ virtualbox_available_extpack_filename_fact }}
+    - file:
+        path: '/tmp/{{ virtualbox_available_extpack_filename_fact }}'
+        state: absent

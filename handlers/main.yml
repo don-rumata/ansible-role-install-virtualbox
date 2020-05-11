@@ -1,0 +1,6 @@
+---
+- name: run-vboxconfig
+  when:
+    - ansible_system == 'Linux'
+  become: yes
+  shell: vboxconfig

@@ -1,0 +1,81 @@
+---
+- name: Install\Update VirtualBox 4 Windows
+  when:
+    - ansible_os_family == 'Windows'
+    - ansible_env.PROCESSOR_ARCHITECTURE == 'AMD64'
+    - virtualbox_full_available_version_fact != virtualbox_exe_version_fact
+  become: yes
+  become_method: runas
+  become_flags: logon_type=new_credentials logon_flags=netcredentials_only
+  block:
+    - win_package:
+        path: '{{ virtualbox_windows_local_download_path }}\{{ virtualbox_installer_file_fact }}'
+        product_id: 'Oracle VM VirtualBox {{ virtualbox_available_version_fact }}'
+        creates_path: '{{ virtualbox_win_path_to_exe_fact }}'
+        arguments:
+          - --silent
+    - win_path:
+        elements:
+          - '{{ ansible_env.ProgramFiles }}\Oracle\VirtualBox'
+          - '%VBOX_MSI_INSTALL_PATH%'
+        state: present
+    - win_file:
+        path: '{{ virtualbox_windows_local_download_path }}'
+        state: absent
+
+
+
+- name: Install VirtualBox 4 Debian\Ubuntu
+  when:
+    - ansible_os_family == 'Debian'
+    - ansible_pkg_mgr == 'apt'
+    - ansible_architecture == 'x86_64'
+  become: yes
+  apt:
+    name: virtualbox-{{ virtualbox_available_major_and_minor_version_fact }}
+    state: present
+    force: yes
+    install_recommends: yes
+  notify:
+    - run-vboxconfig
+
+
+
+- name: Install VirtualBox 4 enterprise RHEL-like
+  when:
+    - ansible_os_family == 'RedHat'
+    - ansible_pkg_mgr == 'yum'
+  become: yes
+  vars:
+    # https://stackoverflow.com/a/47091066/5430535
+    # https://github.com/ansible/ansible/issues/32532#issuecomment-341641007
+    ansible_python_interpreter: /usr/bin/python2.7
+  yum:
+    name:
+      - VirtualBox-{{ virtualbox_available_major_and_minor_version_fact }}
+    state: present
+  notify:
+    - run-vboxconfig
+
+
+
+# TODO
+# - name: Install VirtualBox 4 OpenSUSE Tumbleweed
+#   when:
+#     - ansible_system == 'Linux'
+#     - ansible_os_family == 'Suse'
+#     - ansible_distribution == 'openSUSE Tumbleweed'
+#     - ansible_pkg_mgr == 'zypper'
+#   become: yes
+#   block:
+#     - package_facts:
+#     # Превращаем "1:7.2+60ubuntu1" в "7.2". Если на bash: LC_ALL=C aptitude show php | grep ^Version | awk '{print $2}' | cut -d ':' -f 2 | cut -d '+' -f 1
+#     - debug:
+#         msg: "{{ ansible_facts.packages['virtualbox'] }}" # [0].version.split(':')[1].split('+')[0] }}"
+#       register: virtualbox_installed_version
+#     - zypper:
+#         name:
+#           - virtualbox
+#         state: present
+#   # notify:
+#   #   - run-vboxconfig

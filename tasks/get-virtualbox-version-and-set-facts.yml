@@ -1,0 +1,236 @@
+---
+- name: Get VirtualBox available version
+  uri:
+    url: '{{ virtualbox_url_version }}'
+    return_content: yes
+  delegate_to: localhost
+  register: virtualbox_available_version
+
+
+
+- name: Set facts about available virtualbox version part 1
+  block:
+    - set_fact:
+        virtualbox_available_version_fact: "{{ virtualbox_available_version.content | trim }}"
+    - set_fact:
+        virtualbox_available_major_and_minor_version_fact: "{{ virtualbox_available_version_fact.split('.', 2)[:-1] | join('.') }}"
+
+
+
+- name: Get VirtualBox checksum content
+  uri:
+    url: '{{ virtualbox_checksum_file_url }}'
+    return_content: yes
+  register: virtualbox_checksum_file_content
+  delegate_to: localhost
+
+
+
+- name: Set facts about available virtualbox version part 2
+  block:
+    - set_fact:
+        virtualbox_available_extpack_filename_fact: '{{ (virtualbox_checksum_file_content.content | regex_findall(".*vbox-extpack"))[0].split("*")[1] }}'
+    - set_fact:
+        virtualbox_available_extpack_checksum_fact: '{{ (virtualbox_checksum_file_content.content | regex_findall(".*vbox-extpack"))[0].split("*")[0] }}'
+    - set_fact:
+        virtualbox_available_private_version_fact: '{{ virtualbox_available_extpack_filename_fact.split("-")[2].split(".")[0] }}'
+    - set_fact:
+        virtualbox_full_available_version_fact: '{{ virtualbox_available_version_fact }}.{{ virtualbox_available_private_version_fact }}'
+    - set_fact:
+        virtualbox_full_available_extpack_version_fact: '{{ virtualbox_full_available_version_fact }}'
+    - set_fact:
+        virtualbox_extpack_direct_download_url_fact: '{{ virtualbox_url_path_to_files }}/{{ virtualbox_available_extpack_filename_fact }}'
+
+
+
+- name: Set facts about Windows only VirtualBox info
+  when: ansible_os_family == 'Windows'
+  block:
+    - set_fact:
+        virtualbox_installer_file_fact: '{{ (virtualbox_checksum_file_content.content | regex_findall(".*exe"))[0].split("*")[1] }}'
+    - set_fact:
+        virtualbox_installer_file_checksum_fact: '{{ (virtualbox_checksum_file_content.content | regex_findall(".*exe"))[0].split("*")[0] }}'
+    - set_fact:
+        virtualbox_win_path_to_exe_fact: '{{ ansible_env.ProgramFiles }}\Oracle\VirtualBox\VirtualBox.exe'
+    - set_fact:
+        virtualbox_direct_download_url_fact: '{{ virtualbox_url_path_to_files }}/{{ virtualbox_installer_file_fact }}'
+
+
+
+- name: Get VirtualBox exe version
+  when: ansible_os_family == 'Windows'
+  become: yes
+  become_method: runas
+  become_flags: logon_type=new_credentials logon_flags=netcredentials_only
+  block:
+    - win_stat:
+        path: "{{ virtualbox_win_path_to_exe_fact }}"
+      register: virtualbox_exe
+    - win_file_version:
+        path: "{{ virtualbox_win_path_to_exe_fact }}"
+      register: virtualbox_exe_file_version
+      when: virtualbox_exe.stat.exists == true
+
+
+
+- name: Get VirtualBox bin status 4 Linux
+  when: ansible_system == 'Linux'
+  become: yes
+  block:
+    - stat:
+        path: /usr/bin/VBoxManage
+      register: virtualbox_bin
+
+
+
+- name: Set facts about installed virtualbox 4 Windows
+  when:
+    - ansible_os_family == 'Windows'
+  block:
+    - set_fact:
+        virtualbox_exe_state_fact: present
+      when: virtualbox_exe.stat.exists == true
+    - set_fact:
+        virtualbox_exe_state_fact: absent
+      when: virtualbox_exe.stat.exists == false
+    - set_fact:
+        virtualbox_exe_version_fact: "{{ virtualbox_exe_file_version.win_file_version.product_version }}"
+      when: virtualbox_exe_state_fact == 'present'
+    - set_fact:
+        virtualbox_exe_version_fact: 0
+      when: virtualbox_exe_state_fact == 'absent'
+
+
+
+- name: Set facts about installed virtualbox 4 Windows
+  when: ansible_system == 'Linux'
+  block:
+    - set_fact:
+        virtualbox_bin_state_fact: present
+      when: virtualbox_bin.stat.exists == true
+    - set_fact:
+        virtualbox_bin_state_fact: absent
+      when: virtualbox_bin.stat.exists == false
+
+
+
+- name: Get facts about Extension Pack 4 Windows
+  when:
+    - ansible_os_family == 'Windows'
+    - virtualbox_exe_state_fact == 'present'
+  become: yes
+  become_method: runas
+  become_flags: logon_type=new_credentials logon_flags=netcredentials_only
+  win_shell: VBoxManage list extpacks
+  register: vboxmanage_list_extpacks_windows
+  changed_when: vboxmanage_list_extpacks_windows.rc != 0
+
+
+
+- name: Get facts about Extension Pack 4 Linux
+  when:
+    - ansible_system == 'Linux'
+    - virtualbox_bin_state_fact == 'present'
+  become: yes
+  command: VBoxManage list extpacks
+  register: vboxmanage_list_extpacks_linux
+  changed_when: vboxmanage_list_extpacks_linux.rc != 0
+
+
+
+# - name: FUCKING dirty hack with debug module
+#   block:
+#     - debug:
+#         msg: "{{ vboxmanage_list_extpacks_windows }}"
+#       register: vboxmanage_list_extpacks_windows_from_debug
+#       when:
+#         - ansible_os_family == 'Windows'
+#         - virtualbox_exe.stat.exists == true
+#     - debug:
+#         msg: "{{ vboxmanage_list_extpacks_linux }}"
+#       register: vboxmanage_list_extpacks_linux_from_debug
+#       when: ansible_system == 'Linux'
+
+
+
+- name: Set facts about Extension Pack
+  vars:
+    # VERY dirty hacks. TODO!
+    virtualbox_installed_extpack_numbers_windows_var: '{{ (vboxmanage_list_extpacks_windows.stdout | regex_search("^Extension.*", multiline=True, ignorecase=True)).split(":")[1] | trim | int }}'
+    virtualbox_installed_extpack_numbers_linux_var: '{{ (vboxmanage_list_extpacks_linux.stdout | regex_search("^Extension.*", multiline=True, ignorecase=True)).split(":")[1] | trim | int }}'
+
+    virtualbox_installed_extpack_version_windows_var: '{{ (vboxmanage_list_extpacks_windows.stdout | regex_search("^Version.*", multiline=True, ignorecase=True)).split(":")[1] | trim }}'
+    virtualbox_installed_extpack_version_linux_var: '{{ (vboxmanage_list_extpacks_linux.stdout | regex_search("^Version.*", multiline=True, ignorecase=True)).split(":")[1] | trim }}'
+
+    virtualbox_installed_extpack_revision_windows_var: '{{ (vboxmanage_list_extpacks_windows.stdout | regex_search("^Revision.*", multiline=True, ignorecase=True)).split(":")[1] | trim }}'
+    virtualbox_installed_extpack_revision_linux_var: '{{ (vboxmanage_list_extpacks_linux.stdout | regex_search("^Revision.*", multiline=True, ignorecase=True)).split(":")[1] | trim }}'
+  block:
+    # Default value
+    - set_fact:
+        virtualbox_installed_extpack_numbers_fact: 0
+    - set_fact:
+        virtualbox_installed_extpack_numbers_fact: "{{ virtualbox_installed_extpack_numbers_windows_var }}"
+      when:
+        - ansible_os_family == 'Windows'
+        - virtualbox_exe_state_fact == 'present'
+    - set_fact:
+        virtualbox_installed_extpack_numbers_fact: '{{ virtualbox_installed_extpack_numbers_linux_var }}'
+      when:
+        - ansible_system == 'Linux'
+        - virtualbox_bin_state_fact == 'present'
+    #---------------------------------------------------------------------------------------------------------------------------------#
+    # Default value
+    - set_fact:
+        virtualbox_installed_extpack_version_fact: 0 | int
+    - set_fact:
+        virtualbox_installed_extpack_version_fact: "{{ virtualbox_installed_extpack_version_windows_var }}"
+      when:
+        - ansible_os_family == 'Windows'
+        - virtualbox_exe_state_fact == 'present'
+        - virtualbox_installed_extpack_numbers_fact != 0
+    - set_fact:
+        virtualbox_installed_extpack_version_fact: "{{ virtualbox_installed_extpack_version_linux_var }}"
+      when:
+        - ansible_system == 'Linux'
+        - virtualbox_bin_state_fact == 'present'
+        - virtualbox_installed_extpack_numbers_fact != 0
+    #---------------------------------------------------------------------------------------------------------------------------------#
+    # Default value
+    - set_fact:
+        virtualbox_installed_extpack_revision_fact: 0
+    - set_fact:
+        virtualbox_installed_extpack_revision_fact: "{{ virtualbox_installed_extpack_revision_windows_var }}"
+      when:
+        - ansible_os_family == 'Windows'
+        - virtualbox_exe_state_fact == 'present'
+        - virtualbox_installed_extpack_numbers_fact != 0
+    - set_fact:
+        virtualbox_installed_extpack_revision_fact: "{{ virtualbox_installed_extpack_revision_linux_var }}"
+      when:
+        - ansible_system == 'Linux'
+        - virtualbox_bin_state_fact == 'present'
+        - virtualbox_installed_extpack_numbers_fact != 0
+    #---------------------------------------------------------------------------------------------------------------------------------#
+    # Default value.
+    - set_fact:
+        virtualbox_full_installed_extpack_version_fact: 0
+    - set_fact:
+        virtualbox_full_installed_extpack_version_fact: '{{ virtualbox_installed_extpack_version_fact }}.{{ virtualbox_installed_extpack_revision_fact }}'
+      when:
+        - ansible_os_family == 'Windows'
+        - virtualbox_exe_state_fact == 'present'
+        - virtualbox_installed_extpack_numbers_fact != 0
+    - set_fact:
+        virtualbox_full_installed_extpack_version_fact: '{{ virtualbox_installed_extpack_version_fact }}.{{ virtualbox_installed_extpack_revision_fact }}'
+      when:
+        - ansible_system == 'Linux'
+        - virtualbox_bin_state_fact == 'present'
+        - virtualbox_installed_extpack_numbers_fact != 0
+
+
+
+# - name: Run module "setup"
+#   setup:
+# #   register: facts_from_setup
+# # - debug:
+# #     msg: "{{ facts_from_setup }}"

@@ -1,0 +1,16 @@
+---
+- name: Download VirtualBox 4 Windows
+  when:
+    - ansible_os_family == 'Windows'
+  become: yes
+  become_method: runas
+  become_flags: logon_type=new_credentials logon_flags=netcredentials_only
+  block:
+    - win_file:
+        path: '{{ virtualbox_windows_local_download_path }}'
+        state: directory
+    - win_get_url:
+        url: '{{ virtualbox_direct_download_url_fact }}'
+        dest: '{{ virtualbox_windows_local_download_path }}\{{ virtualbox_installer_file_fact }}'
+        checksum: '{{ virtualbox_installer_file_checksum_fact }}'
+        checksum_algorithm: '{{ virtualbox_checksum_algorithm }}'

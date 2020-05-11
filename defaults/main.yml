@@ -1,0 +1,50 @@
+---
+#--- VirtualBox Edition ---#
+
+# http://download.virtualbox.org/virtualbox/
+
+virtualbox_edition: latest-stable
+
+# virtualbox_edition: latest-beta
+
+# virtualbox_edition: latest
+
+#--- VirtualBox setup location ---#
+
+virtualbox_install_from: internet
+
+# # Only 4 Windows. My local private scripts. TODO.
+# virtualbox_install_from: local
+
+#--- VirtualBox api urls ---#
+
+virtualbox_url_prefix: 'https://download.virtualbox.org/virtualbox'
+
+virtualbox_url_version: '{{ virtualbox_url_prefix }}/{{ virtualbox_edition | upper }}.TXT'
+
+virtualbox_url_path_to_files: '{{ virtualbox_url_prefix }}/{{ virtualbox_available_version_fact }}'
+
+virtualbox_checksum_file_url: '{{ virtualbox_url_path_to_files }}/{{ virtualbox_checksum_algorithm | upper }}SUMS'
+
+#--- VirtualBox local download path ---#
+
+virtualbox_windows_local_download_path: '{{ ansible_env.TMP }}\virtualbox'
+
+#--- VirtualBox checksum algorithm ---#
+
+virtualbox_checksum_algorithm: sha256
+
+# virtualbox_checksum_algorithm: md5
+
+#--- VirtualBox version ---#
+
+virtualbox_version: latest
+
+# virtualbox_version: 5.2.38
+
+#--- Other --#
+
+# If you *NOT* use apt-cacher-ng or other caching proxy - select "https".
+http_or_https: http
+# http_or_https: https
+

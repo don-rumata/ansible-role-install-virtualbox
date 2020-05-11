@@ -1,0 +1,50 @@
+galaxy_info:
+  author: don Rumata
+  description: Install for Linux and Windows with Extension Pack.
+  company: localhost
+
+  license: Apache License, Version 2.0
+
+  min_ansible_version: 2.7
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+        - eoan
+        - disco
+        - cosmic
+        - bionic
+        - xenial
+    - name: Debian
+      version:
+        - jessie
+        - stretch
+        - buster
+        - stable
+        - testing
+    # https://github.com/ansible/galaxy/issues/2072
+    - name: EL
+      versions:
+        - 8
+        - 7
+    - name: Windows
+      version:
+        - 2008x64
+        - 2008x86
+        - 2019
+
+  galaxy_tags:
+    - virtualbox
+    - vm
+    - oracle
+    - desktop
+    - linux
+    - ubuntu
+    - debian
+    - centos
+    - windows
+    - windows7
+    - windows10
+
+  dependencies: []

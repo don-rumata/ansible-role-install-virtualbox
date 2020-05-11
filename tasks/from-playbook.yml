@@ -1,0 +1,203 @@
+---
+# https://ru.stackoverflow.com/q/901773/191416
+    - name: Get hash of license file and latest version
+      block:
+        # - local_action: shell wget -O - http://172.16.11.8/soft/virtualbox/latest/hash-license-txt
+        #   register: hash_lic
+        # - local_action: shell wget -O - http://172.16.11.8/soft/virtualbox/latest.txt
+        #   register: virtualbox_latest_stable_version
+
+        - local_action:
+            module: uri
+            url: http://172.16.11.8/soft/virtualbox/latest-stable/hash-license-txt
+            return_content: yes
+          register: hash_lic
+        - debug:
+            msg: "{{ hash_lic.content | replace('\n', '') }}"
+          register: hash_lic
+        - debug:
+            msg: "{{ hash_lic.msg }}"
+
+        - local_action:
+            module: uri
+            url: http://172.16.11.8/soft/virtualbox/LATEST-STABLE.TXT
+            return_content: yes
+          register: virtualbox_latest_stable_version
+        - debug:
+            msg: "{{ virtualbox_latest_stable_version.content | replace('\n', '') }}"
+          register: virtualbox_latest_stable_version
+        - debug:
+            msg: "{{ virtualbox_latest_stable_version.msg.split('.', 2)[:-1] | join('.') }}"
+          register: virtualbox_latest_major_and_minor_version
+
+# TODO: посмотреть в сторону фильров, а не регулярок.
+# https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters.html
+      tags:
+        - virtualbox
+        - install
+        - lic
+        - license
+        - sha256
+        - latest_vrsion
+
+## Вынес debug из таски выше в отдельный таск и всё поехало. Хз как.
+## http://docs.ansible.com/ansible/latest/debug_module.html
+#    - debug:
+#        var: hash_lic.stdout
+#        verbosity: 6
+#      tags:
+#        - lic
+
+    - name: Install\Update VirtualBox 4 Windows
+      when:
+        - ansible_os_family == 'Windows'
+        - ansible_env.PROCESSOR_ARCHITECTURE == 'AMD64'
+      become: yes
+      become_method: runas
+      become_flags: logon_type=new_credentials logon_flags=netcredentials_only
+      block:
+        - win_package:
+            path: \\172.16.11.8\soft\virtualbox\latest-stable\virtualbox-latest.exe
+            product_id: 'Oracle VM VirtualBox {{ virtualbox_latest_stable_version.msg }}'
+            creates_path: '%ProgramFiles%\Oracle\VirtualBox\VirtualBox.exe'
+            # creates_version: '{{ virtualbox_latest_stable_version.msg }}'
+            arguments:
+              - --silent
+        - win_path:
+            elements:
+              - '%ProgramFiles%\Oracle\VirtualBox\'
+            state: absent
+        - win_path:
+            elements:
+              - '{{ ansible_env.ProgramFiles }}\Oracle\VirtualBox'
+              - '%VBOX_MSI_INSTALL_PATH%'
+            state: present
+# Пробовал воткнуть путь скачивания\установки "TMP". Качается, но ставиться не хочет. Хз почему.
+        - win_copy:
+            src: \\172.16.11.8\soft\virtualbox\latest-stable\oracle_vm_virtualbox_extension_pack-latest.vbox-extpack
+            dest: '%ProgramFiles%\Oracle\VirtualBox\oracle_vm_virtualbox_extension_pack-latest.vbox-extpack'
+            remote_src: yes
+#            force: yes
+# https://forums.virtualbox.org/viewtopic.php?f=6&t=82761#p391279
+        - win_command: 'vboxmanage extpack install --replace oracle_vm_virtualbox_extension_pack-latest.vbox-extpack --accept-license={{ hash_lic.msg }}'
+          args:
+            chdir: '%VBOX_MSI_INSTALL_PATH%'
+            creates: '%VBOX_MSI_INSTALL_PATH%\ExtensionPacks\Oracle_VM_VirtualBox_Extension_Pack\installed-vbox-extpack-{{ virtualbox_latest_stable_version.msg }}-label'
+        - win_file:
+            path: '%VBOX_MSI_INSTALL_PATH%\ExtensionPacks\Oracle_VM_VirtualBox_Extension_Pack\installed-vbox-extpack-{{ virtualbox_latest_stable_version.msg }}-label'
+            state: touch
+# echo y | 
+# Хэш ниже - sha256sum файла ./ExtPack-license.txt внутри tar-архива *.vbox-extpack. Если файл поменяется - наверное надо будет как-то это парсить и автоматически подставлять или типа того.
+#--accept-license=715c7246dc0f779ceab39446812362b2f9bf64a55ed5d3a905f053cfab36da9e
+
+# https://stackoverflow.com/a/32093978
+        - win_command: 'vboxmanage hostonlyif remove "VirtualBox Host-Only Ethernet Adapter"'
+          args:
+            chdir: '%VBOX_MSI_INSTALL_PATH%'
+          # Игнорим, потому что при повторном удалении - валится в ошибку 404
+          ignore_errors: yes
+
+########################################################################################################################
+
+    - name: Install VirtualBox 4 Ubuntu
+      when:
+        - ansible_distribution == 'Ubuntu'
+        - ansible_architecture == 'x86_64'
+      become: yes
+      block:
+        - apt_repository:
+            repo: deb [arch=amd64] http://download.virtualbox.org/virtualbox/debian {{ ansible_distribution_release }} contrib non-free
+            state: present
+            filename: virtualbox
+            update_cache: no
+        - apt_key:
+            url: "{{ item }}"
+            state: present
+          with_items:
+            - https://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc
+            - https://www.virtualbox.org/download/oracle_vbox.asc
+            - https://download.virtualbox.org/virtualbox/debian/oracle_vbox_2016.asc
+        - apt:
+            update_cache: yes
+            # force: yes
+# http://pxe/dokuwiki/doku.php?id=soft:linux:virtualbox:add-repository
+        # - shell: aptitude search -F %p --sort version virtualbox- | tail -1 | sed 's/:i386//' | tr -d ' '
+        #   register: latest_vbox_version
+        - apt:
+            # name: "{{ latest_vbox_version.stdout }}"
+            name: virtualbox-{{ virtualbox_latest_major_and_minor_version.msg }}
+            state: present
+            force: yes
+            install_recommends: yes
+            # Не даёт плейбуку вывалиться в ошибку, но не апает виртуалбокс на мажорную версию выше.
+            # only_upgrade: yes
+            # allow_unauthenticated: yes
+# https://stackoverflow.com/a/38834599
+        - shell: vboxconfig
+        - synchronize:
+            src: rsync://172.16.11.8/soft/virtualbox/latest-stable/oracle_vm_virtualbox_extension_pack-latest.vbox-extpack
+            dest: /tmp/
+            copy_links: yes
+            compress: no
+          delegate_to: "{{ inventory_hostname }}"
+        - shell: vboxmanage extpack install --replace /tmp/oracle_vm_virtualbox_extension_pack-latest.vbox-extpack --accept-license={{ hash_lic.msg }}
+        - file:
+            path: /tmp/oracle_vm_virtualbox_extension_pack-latest.vbox-extpack
+            state: absent
+            force: yes
+    # - debug:
+    #     var: latest_vbox_version.stdout
+        - copy:
+            src: /usr/share/applications/virtualbox.desktop
+            dest: '{{ item.path }}/Рабочий стол/virtualbox.desktop'
+            owner: '{{ item.uid }}'
+            group: '{{ item.gid }}'
+            mode: 0755
+            remote_src: yes
+          with_items: "{{ linux_registered_users.files }}"
+      tags:
+        - linux
+        - ubuntu
+        - virtualbox
+        - install
+
+# TODO
+    - name: Install VirtualBox 4 Fedora
+      when: 
+        - ansible_distribution in ['Fedora', 'Generic']
+      become: yes
+      block:
+        - yum_repository:
+            file: virtualbox
+            name: virtualbox
+            description: Fedora $releasever - $basearch
+            baseurl: http://download.virtualbox.org/virtualbox/rpm/fedora/$releasever/$basearch
+            gpgkey: https://www.virtualbox.org/download/oracle_vbox.asc
+            enabled: yes
+            gpgcheck: yes
+            state: present
+      tags:
+        - linux
+        - fedora
+        - virtualbox
+        - install
+
+    - name: Install VirtualBox 4 CentOS\RHEL
+      when: 
+        - ansible_distribution in ['CentOS', 'Red Hat']
+      become: yes
+      block:
+        - yum_repository:
+            file: virtualbox
+            name: virtualbox
+            description: Oracle Linux / RHEL / CentOS-$releasever / $basearch - VirtualBox
+            baseurl: http://download.virtualbox.org/virtualbox/rpm/el/$releasever/$basearch
+            gpgkey: https://www.virtualbox.org/download/oracle_vbox.asc
+            enabled: yes
+            gpgcheck: yes
+            state: present
+      tags:
+        - linux
+        - centos
+        - virtualbox
+        - install

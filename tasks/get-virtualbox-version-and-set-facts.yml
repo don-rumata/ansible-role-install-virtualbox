@@ -69,17 +69,16 @@
     - win_file_version:
         path: "{{ virtualbox_win_path_to_exe_fact }}"
       register: virtualbox_exe_file_version
-      when: virtualbox_exe.stat.exists == true
+      when: virtualbox_exe.stat.exists == 'true'
 
 
 
 - name: Get VirtualBox bin status 4 Linux
   when: ansible_system == 'Linux'
   become: yes
-  block:
-    - stat:
-        path: /usr/bin/VBoxManage
-      register: virtualbox_bin
+  stat:
+    path: /usr/bin/VBoxManage
+  register: virtualbox_bin
 
 
 
@@ -89,10 +88,10 @@
   block:
     - set_fact:
         virtualbox_exe_state_fact: present
-      when: virtualbox_exe.stat.exists == true
+      when: virtualbox_exe.stat.exists == 'true'
     - set_fact:
         virtualbox_exe_state_fact: absent
-      when: virtualbox_exe.stat.exists == false
+      when: virtualbox_exe.stat.exists == 'false'
     - set_fact:
         virtualbox_exe_version_fact: "{{ virtualbox_exe_file_version.win_file_version.product_version }}"
       when: virtualbox_exe_state_fact == 'present'
@@ -107,10 +106,10 @@
   block:
     - set_fact:
         virtualbox_bin_state_fact: present
-      when: virtualbox_bin.stat.exists == true
+      when: virtualbox_bin.stat.exists == 'true'
     - set_fact:
         virtualbox_bin_state_fact: absent
-      when: virtualbox_bin.stat.exists == false
+      when: virtualbox_bin.stat.exists == 'false'
 
 
 
@@ -138,32 +137,37 @@
 
 
 
-# - name: FUCKING dirty hack with debug module
-#   block:
-#     - debug:
-#         msg: "{{ vboxmanage_list_extpacks_windows }}"
-#       register: vboxmanage_list_extpacks_windows_from_debug
-#       when:
-#         - ansible_os_family == 'Windows'
-#         - virtualbox_exe.stat.exists == true
-#     - debug:
-#         msg: "{{ vboxmanage_list_extpacks_linux }}"
-#       register: vboxmanage_list_extpacks_linux_from_debug
-#       when: ansible_system == 'Linux'
-
-
-
 - name: Set facts about Extension Pack
   vars:
     # VERY dirty hacks. TODO!
-    virtualbox_installed_extpack_numbers_windows_var: '{{ (vboxmanage_list_extpacks_windows.stdout | regex_search("^Extension.*", multiline=True, ignorecase=True)).split(":")[1] | trim | int }}'
-    virtualbox_installed_extpack_numbers_linux_var: '{{ (vboxmanage_list_extpacks_linux.stdout | regex_search("^Extension.*", multiline=True, ignorecase=True)).split(":")[1] | trim | int }}'
+    virtualbox_installed_extpack_numbers_windows_var:
+      '{{ (vboxmanage_list_extpacks_windows.stdout
+      | regex_search("^Extension.*", multiline=True, ignorecase=True)).split(":")[1]
+      | trim
+      | int }}'
+    virtualbox_installed_extpack_numbers_linux_var:
+      '{{ (vboxmanage_list_extpacks_linux.stdout
+      | regex_search("^Extension.*", multiline=True, ignorecase=True)).split(":")[1]
+      | trim
+      | int }}'
 
-    virtualbox_installed_extpack_version_windows_var: '{{ (vboxmanage_list_extpacks_windows.stdout | regex_search("^Version.*", multiline=True, ignorecase=True)).split(":")[1] | trim }}'
-    virtualbox_installed_extpack_version_linux_var: '{{ (vboxmanage_list_extpacks_linux.stdout | regex_search("^Version.*", multiline=True, ignorecase=True)).split(":")[1] | trim }}'
+    virtualbox_installed_extpack_version_windows_var:
+      '{{ (vboxmanage_list_extpacks_windows.stdout
+      | regex_search("^Version.*", multiline=True, ignorecase=True)).split(":")[1]
+      | trim }}'
+    virtualbox_installed_extpack_version_linux_var:
+      '{{ (vboxmanage_list_extpacks_linux.stdout
+      | regex_search("^Version.*", multiline=True, ignorecase=True)).split(":")[1]
+      | trim }}'
 
-    virtualbox_installed_extpack_revision_windows_var: '{{ (vboxmanage_list_extpacks_windows.stdout | regex_search("^Revision.*", multiline=True, ignorecase=True)).split(":")[1] | trim }}'
-    virtualbox_installed_extpack_revision_linux_var: '{{ (vboxmanage_list_extpacks_linux.stdout | regex_search("^Revision.*", multiline=True, ignorecase=True)).split(":")[1] | trim }}'
+    virtualbox_installed_extpack_revision_windows_var:
+      '{{ (vboxmanage_list_extpacks_windows.stdout
+      | regex_search("^Revision.*", multiline=True, ignorecase=True)).split(":")[1]
+      | trim }}'
+    virtualbox_installed_extpack_revision_linux_var:
+      '{{ (vboxmanage_list_extpacks_linux.stdout
+      | regex_search("^Revision.*", multiline=True, ignorecase=True)).split(":")[1]
+      | trim }}'
   block:
     # Default value
     - set_fact:

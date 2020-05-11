@@ -1,26 +1,32 @@
 ---
+- name: Create download directory 4 Windows
+  when: ansible_os_family == 'Windows'
+  become: yes
+  become_method: runas
+  become_flags: logon_type=new_credentials logon_flags=netcredentials_only
+  win_file:
+    path: '{{ virtualbox_windows_local_download_path }}'
+    state: directory
+
+
+
 - name: Download VirtualBox Extension Pack 4 Windows
   when: ansible_os_family == 'Windows'
   become: yes
   become_method: runas
   become_flags: logon_type=new_credentials logon_flags=netcredentials_only
-  block:
-    - win_file:
-        path: '{{ virtualbox_windows_local_download_path }}'
-        state: directory
-    - win_get_url:
-        url: '{{ virtualbox_extpack_direct_download_url_fact }}'
-        dest: '{{ virtualbox_windows_local_download_path }}\{{ virtualbox_available_extpack_filename_fact }}'
-        checksum: '{{ virtualbox_available_extpack_checksum_fact }}'
-        checksum_algorithm: '{{ virtualbox_checksum_algorithm }}'
+  win_get_url:
+    url: '{{ virtualbox_extpack_direct_download_url_fact }}'
+    dest: '{{ virtualbox_windows_local_download_path }}\{{ virtualbox_available_extpack_filename_fact }}'
+    checksum: '{{ virtualbox_available_extpack_checksum_fact }}'
+    checksum_algorithm: '{{ virtualbox_checksum_algorithm }}'
 
 
 
 - name: Download VirtualBox Extension Pack 4 Linux
   when: ansible_system == 'Linux'
   become: yes
-  block:
-    - get_url:
-        url: '{{ virtualbox_extpack_direct_download_url_fact }}'
-        dest: '/tmp/{{ virtualbox_available_extpack_filename_fact }}'
-        checksum: '{{ virtualbox_checksum_algorithm }}:{{ virtualbox_available_extpack_checksum_fact }}'
+  get_url:
+    url: '{{ virtualbox_extpack_direct_download_url_fact }}'
+    dest: '/tmp/{{ virtualbox_available_extpack_filename_fact }}'
+    checksum: '{{ virtualbox_checksum_algorithm }}:{{ virtualbox_available_extpack_checksum_fact }}'

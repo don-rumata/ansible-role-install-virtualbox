@@ -1,0 +1,35 @@
+---
+- name: Add repo VirtualBox 4 Debian\Ubuntu
+  apt_repository:
+    repo: 'deb [arch=amd64] {{ http_or_https }}://download.virtualbox.org/virtualbox/debian {{ ansible_distribution_release }} contrib non-free'
+    state: present
+    filename: virtualbox
+    update_cache: no
+  notify: update-apt-repo-cache
+  tags:
+    - linux
+    - ubuntu
+    - virtualbox
+    - repo
+    - add
+
+
+
+- name: Add repo GPG key
+  apt_key:
+    url: "{{ item }}"
+    state: present
+  with_items:
+    - https://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc
+    - https://www.virtualbox.org/download/oracle_vbox.asc
+    - https://download.virtualbox.org/virtualbox/debian/oracle_vbox_2016.asc
+  tags:
+    - linux
+    - ubuntu
+    - virtualbox
+    - repo
+    - key
+    - gpg
+
+
+

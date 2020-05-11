@@ -1,0 +1,17 @@
+---
+- name: Add repo VirtualBox 4 CentOS\RHEL
+  yum_repository:
+    file: virtualbox
+    name: virtualbox
+    description: Oracle Linux / RHEL / CentOS-$releasever / $basearch - VirtualBox
+    baseurl: '{{ http_or_https }}://download.virtualbox.org/virtualbox/rpm/el/$releasever/$basearch'
+    gpgkey: https://www.virtualbox.org/download/oracle_vbox.asc
+    enabled: yes
+    gpgcheck: yes
+    state: present
+  tags:
+    - linux
+    - centos
+    - virtualbox
+    - repo
+    - config

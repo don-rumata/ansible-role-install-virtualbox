@@ -47,4 +47,3 @@ virtualbox_version: latest
 # If you *NOT* use apt-cacher-ng or other caching proxy - select "https".
 http_or_https: http
 # http_or_https: https
-

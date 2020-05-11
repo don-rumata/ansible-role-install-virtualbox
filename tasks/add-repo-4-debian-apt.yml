@@ -1,5 +1,9 @@
 ---
 - name: Add repo VirtualBox 4 Debian\Ubuntu
+  when:
+    - ansible_os_family == 'Debian'
+    - ansible_pkg_mgr == 'apt'
+  become: yes
   apt_repository:
     repo: 'deb [arch=amd64] {{ http_or_https }}://download.virtualbox.org/virtualbox/debian {{ ansible_distribution_release }} contrib non-free'
     state: present
@@ -14,6 +18,10 @@
     - add
 #---
 - name: Add repo GPG key
+  when:
+    - ansible_os_family == 'Debian'
+    - ansible_pkg_mgr == 'apt'
+  become: yes
   apt_key:
     url: "{{ item }}"
     state: present

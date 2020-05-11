@@ -1,5 +1,9 @@
 ---
 - name: Add repo VirtualBox 4 CentOS\RHEL
+  when:
+    - ansible_os_family == 'RedHat'
+    - ansible_pkg_mgr == 'yum'
+  become: yes
   yum_repository:
     file: virtualbox
     name: virtualbox

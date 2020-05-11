@@ -1,7 +1,6 @@
 ---
-
-- import_tasks: add-repo-4-{{ ansible_os_family | lower }}-{{ ansible_pkg_mgr | lower }}.yml
-  become: yes
+- import_tasks: add-repo-4-debian-apt.yml
+- import_tasks: add-repo-4-redhat-yum.yml
 
 # TODO.
 # - name: Add repo VirtualBox 4 Fedora

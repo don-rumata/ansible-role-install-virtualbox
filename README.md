@@ -1,5 +1,7 @@
 # Ansible Role: Install VirtualBox
 
+[![License][license-image]][license-url]
+
 Install [VirtualBox](https://virtualbox.org) for Linux and Windows with Extension Pack.
 
 ## Work on
@@ -121,3 +123,6 @@ Apache License, Version 2.0
 - Add support ArchLinux
 
 - Add uninstall.yml
+
+[license-image]: https://img.shields.io/github/license/don-rumata/ansible-role-install-virtualbox.svg
+[license-url]: https://opensource.org/licenses/Apache-2.0

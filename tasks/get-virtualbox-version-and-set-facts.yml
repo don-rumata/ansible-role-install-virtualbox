@@ -214,3 +214,7 @@
 # #   register: facts_from_setup
 # # - debug:
 # #     msg: "{{ facts_from_setup }}"
+
+# https://docs.ansible.com/ansible/latest/reference_appendices/special_variables.html
+- debug:
+    msg: "{{ hostvars }}"

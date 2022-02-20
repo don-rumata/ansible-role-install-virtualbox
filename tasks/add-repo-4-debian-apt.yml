@@ -3,7 +3,6 @@
   when:
     - ansible_os_family == 'Debian'
     - ansible_pkg_mgr == 'apt'
-    - ansible_virtualization_role == 'guest'
   become: yes
   apt_repository:
     repo: 'deb [arch=amd64] {{ http_or_https }}://download.virtualbox.org/virtualbox/debian {{ ansible_distribution_release }} contrib non-free'

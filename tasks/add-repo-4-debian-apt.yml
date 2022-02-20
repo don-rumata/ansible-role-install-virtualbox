@@ -8,7 +8,6 @@
     repo: 'deb [arch=amd64] {{ http_or_https }}://download.virtualbox.org/virtualbox/debian {{ ansible_distribution_release }} contrib non-free'
     state: present
     filename: virtualbox
-    update_cache: no
   tags:
     - linux
     - ubuntu

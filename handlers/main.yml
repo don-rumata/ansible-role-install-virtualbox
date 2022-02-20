@@ -4,11 +4,3 @@
     - ansible_system == 'Linux'
   become: yes
   command: vboxconfig
-
-- name: update-apt-repo-cache
-  when:
-    - ansible_os_family == 'Debian'
-    - ansible_pkg_mgr == 'apt'
-  become: yes
-  apt:
-    update_cache: yes

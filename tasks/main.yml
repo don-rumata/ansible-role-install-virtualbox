@@ -1,4 +1,6 @@
 ---
+- import_tasks: update-cache.yml
+  
 - import_tasks: get-virtualbox-version-and-set-facts.yml
 
 - import_tasks: install-dependencies.yml

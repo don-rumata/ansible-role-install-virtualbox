@@ -1,0 +1,11 @@
+---
+# https://stackoverflow.com/a/41537418
+- name: Update cache 4 Debian\Ubuntu
+  when:
+    - ansible_os_family == 'Debian'
+    - ansible_pkg_mgr == 'apt'
+  become: yes
+  apt:
+    update_cache: yes
+    # force: yes
+    cache_valid_time: 86400 # One day

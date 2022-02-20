@@ -9,7 +9,7 @@
     name: virtualbox
     description: Oracle Linux / RHEL / CentOS-$releasever / $basearch - VirtualBox
     baseurl: '{{ http_or_https }}://download.virtualbox.org/virtualbox/rpm/el/$releasever/$basearch'
-    gpgkey: https://www.virtualbox.org/download/oracle_vbox.asc
+    gpgkey: "{{ virtualbox_repo_rpm_key }}"
     enabled: yes
     gpgcheck: yes
     state: present

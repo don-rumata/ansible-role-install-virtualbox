@@ -9,12 +9,13 @@ virtualbox_edition: latest-stable
 
 # virtualbox_edition: latest
 
-#--- VirtualBox setup location ---#
+#--- VirtualBox repos ---#
 
-virtualbox_install_from: internet
+virtualbox_repo_deb_key:
+  - https://www.virtualbox.org/download/oracle_vbox.asc
+  - https://download.virtualbox.org/virtualbox/debian/oracle_vbox_2016.asc
 
-# # Only 4 Windows. My local private scripts. TODO.
-# virtualbox_install_from: local
+virtualbox_repo_rpm_key: https://www.virtualbox.org/download/oracle_vbox.asc
 
 #--- VirtualBox api urls ---#
 

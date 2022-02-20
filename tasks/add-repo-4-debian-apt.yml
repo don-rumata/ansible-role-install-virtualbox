@@ -15,7 +15,9 @@
     - virtualbox
     - repo
     - add
+
 #---
+
 - name: Add repo GPG key
   when:
     - ansible_os_family == 'Debian'
@@ -25,9 +27,7 @@
     url: "{{ item }}"
     state: present
   with_items:
-    - https://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc
-    - https://www.virtualbox.org/download/oracle_vbox.asc
-    - https://download.virtualbox.org/virtualbox/debian/oracle_vbox_2016.asc
+    - "{{ virtualbox_repo_deb_key }}"
   tags:
     - linux
     - ubuntu

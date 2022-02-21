@@ -117,18 +117,20 @@
 
 #---
 
+# https://fixmypc.ru/post/powershell-replace-zamena-strok-v-tekste-i-faile/
 - name: Get facts about Extension Pack 4 Windows
   when:
     - ansible_os_family == 'Windows'
+    - virtualbox_exe.stat.exists == true
     - virtualbox_exe_state_fact == 'present'
   become: yes
   become_method: runas
   become_flags: logon_type=new_credentials logon_flags=netcredentials_only
-  win_shell: VBoxManage list extpacks
+  win_shell: |
+    $for_yaml = VBoxManage list extpacks
+    $for_yaml -replace '^', '  ' -replace '  Extension', '- Extension'
   register: vboxmanage_list_extpacks_windows
   changed_when: vboxmanage_list_extpacks_windows.rc != 0
-
-- pause:
 
 #---
 
@@ -158,13 +160,34 @@
 #     }
 #   ]
 # }
-- name: Set facts about Extension Pack
-  when:
-    - ansible_system == 'Linux'
-  set_fact:
-    virtualbox_installed_extpack_info_fact: "{{ vboxmanage_list_extpacks_linux.stdout | from_yaml }}"
 
-# - pause:
+# TODO. Я не знаю как сделать мЕньшим количеством кода, поэтому воткнул заглушку "plugobj".
+- name: Set facts about Extension Pack
+  vars:
+    plugobj:
+      plugkey: plugvalue
+  set_fact:
+    virtualbox_installed_extpack_info_linux_fact:
+      "{{ vboxmanage_list_extpacks_linux.stdout
+      | from_yaml
+      | default(plugobj) }}"
+    virtualbox_installed_extpack_info_windows_fact:
+      "{{ vboxmanage_list_extpacks_windows.stdout
+      | from_yaml
+      | default(plugobj) }}"
+
+# Оба варианта корректно работают. Оставил для примера.
+- set_fact:
+    # virtualbox_installed_extpack_info_fact: "{{ virtualbox_installed_extpack_info_linux_fact | combine(virtualbox_installed_extpack_info_windows_fact) }}"
+    virtualbox_installed_extpack_info_fact:
+      "{{ virtualbox_installed_extpack_info_windows_fact
+      | combine(virtualbox_installed_extpack_info_linux_fact) }}"
+
+# 4 debug
+# - name:
+#   when: virtualbox_installed_extpack_info_fact1 == virtualbox_installed_extpack_info_fact2
+#   win_command: whoami
+#   command: whoami
 
 #---
 

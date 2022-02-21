@@ -14,18 +14,24 @@ virtualbox_edition: latest-stable
 virtualbox_repo_deb_key:
   - https://www.virtualbox.org/download/oracle_vbox.asc
   - https://download.virtualbox.org/virtualbox/debian/oracle_vbox_2016.asc
+# virtualbox_repo_deb_key:
+#   - http://10.10.10.10/soft/virtualbox/oracle_vbox.asc
+#   - http://10.10.10.10/soft/virtualbox/oracle_vbox_2016.asc
 
 virtualbox_repo_rpm_key: https://www.virtualbox.org/download/oracle_vbox.asc
+# virtualbox_repo_rpm_key: http://10.10.10.10/soft/virtualbox/oracle_vbox.asc
 
 #--- VirtualBox api urls ---#
 
 virtualbox_url_prefix: 'https://download.virtualbox.org/virtualbox'
 
 virtualbox_url_version: '{{ virtualbox_url_prefix }}/{{ virtualbox_edition | upper }}.TXT'
+# virtualbox_url_version: http://10.10.10.10/soft/virtualbox/latest-stable.txt
 
 virtualbox_url_path_to_files: '{{ virtualbox_url_prefix }}/{{ virtualbox_available_version_fact }}'
 
 virtualbox_checksum_file_url: '{{ virtualbox_url_path_to_files }}/{{ virtualbox_checksum_algorithm | upper }}SUMS'
+# virtualbox_checksum_file_url: http://10.10.10.10/soft/virtualbox/latest-stable/SHA256SUMS
 
 #--- VirtualBox local download path ---#
 

@@ -53,6 +53,7 @@
     - set_fact:
         virtualbox_win_path_to_exe_fact: '{{ ansible_env.ProgramFiles }}\Oracle\VirtualBox\VirtualBox.exe'
     - set_fact:
+    # TODO. Добавить переменную для локального скачивания.
         virtualbox_direct_download_url_fact: '{{ virtualbox_url_path_to_files }}/{{ virtualbox_installer_file_fact }}'
 
 #---
@@ -69,7 +70,7 @@
     - win_file_version:
         path: "{{ virtualbox_win_path_to_exe_fact }}"
       register: virtualbox_exe_file_version
-      when: virtualbox_exe.stat.exists == 'true'
+      when: virtualbox_exe.stat.exists == true
 
 #---
 
@@ -87,16 +88,20 @@
   block:
     - set_fact:
         virtualbox_exe_state_fact: present
-      when: virtualbox_exe.stat.exists == 'true'
+      when: virtualbox_exe.stat.exists == true
     - set_fact:
         virtualbox_exe_state_fact: absent
-      when: virtualbox_exe.stat.exists == 'false'
+      when: virtualbox_exe.stat.exists == false
     - set_fact:
         virtualbox_exe_version_fact: "{{ virtualbox_exe_file_version.win_file_version.product_version }}"
-      when: virtualbox_exe_state_fact == 'present'
+      when:
+        - virtualbox_exe.stat.exists == true
+        - virtualbox_exe_state_fact == 'present'
     - set_fact:
         virtualbox_exe_version_fact: 0
-      when: virtualbox_exe_state_fact == 'absent'
+      when:
+        - virtualbox_exe.stat.exists == false
+        - virtualbox_exe_state_fact == 'absent'
 
 #---
 
@@ -105,10 +110,10 @@
   block:
     - set_fact:
         virtualbox_bin_state_fact: present
-      when: virtualbox_bin.stat.exists == 'true'
+      when: virtualbox_bin.stat.exists == true
     - set_fact:
         virtualbox_bin_state_fact: absent
-      when: virtualbox_bin.stat.exists == 'false'
+      when: virtualbox_bin.stat.exists == false
 
 #---
 
@@ -123,20 +128,43 @@
   register: vboxmanage_list_extpacks_windows
   changed_when: vboxmanage_list_extpacks_windows.rc != 0
 
+- pause:
+
 #---
 
 # https://stackoverflow.com/q/57837867
 - name: Get facts about Extension Pack 4 Linux
   when:
     - ansible_system == 'Linux'
-    - virtualbox_bin_state_fact is defined
-    - virtualbox_bin_state_fact == 'present'
+    # - virtualbox_bin_state_fact is defined
+    # - virtualbox_bin_state_fact == 'present'
   become: yes
   shell: vboxmanage list extpacks | sed 's/^/  / ; s/  Extension/- Extension/'
   register: vboxmanage_list_extpacks_linux
   changed_when: vboxmanage_list_extpacks_linux.rc != 0
 
-- pause:
+# {
+#   "virtualbox_installed_extpack_info_fact": [
+#     {
+#       "Description": "Oracle Cloud Infrastructure integration, USB 2.0 and USB 3.0 Host Controller, Host Webcam, VirtualBox RDP, PXE ROM, Disk Encryption, NVMe.",
+#       "Edition": null,
+#       "Extension Packs": 1,
+#       "Pack no. 0": "Oracle VM VirtualBox Extension Pack",
+#       "Revision": 149290,
+#       "Usable": true,
+#       "VRDE Module": "VBoxVRDP",
+#       "Version": "6.1.32",
+#       "Why unusable": null
+#     }
+#   ]
+# }
+- name: Set facts about Extension Pack
+  when:
+    - ansible_system == 'Linux'
+  set_fact:
+    virtualbox_installed_extpack_info_fact: "{{ vboxmanage_list_extpacks_linux.stdout | from_yaml }}"
+
+# - pause:
 
 #---
 

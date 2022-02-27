@@ -4,9 +4,7 @@
 # http://download.virtualbox.org/virtualbox/
 
 virtualbox_edition: latest-stable
-
 # virtualbox_edition: latest-beta
-
 # virtualbox_edition: latest
 
 #--- VirtualBox repos ---#
@@ -35,6 +33,13 @@ virtualbox_checksum_file_url: '{{ virtualbox_url_path_to_files }}/{{ virtualbox_
 
 virtualbox_windows_local_download_path: '{{ ansible_env.TMP }}\virtualbox'
 
+virtualbox_install_extension_pack: true
+# virtualbox_install_extension_pack: false
+
+# If the variable is defined - virtualbox will be downloaded from the specified location
+# virtualbox_direct_download_url: http://10.10.10.10/soft/virtualbox/latest-stable/virtualbox-latest.exe
+
+# If the variable is defined - extension pack will be downloaded from the specified location
 # virtualbox_extpack_direct_download_url: http://10.10.10.10/soft/virtualbox/latest-stable/oracle_vm_virtualbox_extension_pack-latest.vbox-extpack
 
 virtualbox_checksum_algorithm: sha256

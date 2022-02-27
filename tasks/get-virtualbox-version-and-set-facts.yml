@@ -49,16 +49,14 @@
 
 - name: Set facts about Windows only VirtualBox info
   when: ansible_os_family == 'Windows'
+  vars:
+    virtualbox_direct_download_url_var: "{{ virtualbox_url_path_to_files + '/' + virtualbox_installer_file_fact }}"
   block:
     - set_fact:
         virtualbox_installer_file_fact: '{{ (virtualbox_checksum_file_content.content | regex_findall(".*exe"))[0].split("*")[1] }}'
-    - set_fact:
         virtualbox_installer_file_checksum_fact: '{{ (virtualbox_checksum_file_content.content | regex_findall(".*exe"))[0].split("*")[0] }}'
-    - set_fact:
         virtualbox_win_path_to_exe_fact: '{{ ansible_env.ProgramFiles }}\Oracle\VirtualBox\VirtualBox.exe'
-    - set_fact:
-    # TODO. Добавить переменную для локального скачивания.
-        virtualbox_direct_download_url_fact: '{{ virtualbox_url_path_to_files }}/{{ virtualbox_installer_file_fact }}'
+        virtualbox_direct_download_url_fact: '{{ virtualbox_direct_download_url | default(virtualbox_direct_download_url_var) }}'
 
 #---
 

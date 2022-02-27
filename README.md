@@ -56,10 +56,46 @@ virtualbox_edition: latest-stable
 # virtualbox_edition: latest-beta
 # virtualbox_edition: latest
 
-#--- VirtualBox checksum algorithm ---#
+#--- VirtualBox repos ---#
+
+virtualbox_repo_deb_key:
+  - https://www.virtualbox.org/download/oracle_vbox.asc
+  - https://download.virtualbox.org/virtualbox/debian/oracle_vbox_2016.asc
+# virtualbox_repo_deb_key:
+#   - http://10.10.10.10/soft/virtualbox/oracle_vbox.asc
+#   - http://10.10.10.10/soft/virtualbox/oracle_vbox_2016.asc
+
+virtualbox_repo_rpm_key: https://www.virtualbox.org/download/oracle_vbox.asc
+# virtualbox_repo_rpm_key: http://10.10.10.10/soft/virtualbox/oracle_vbox.asc
+
+#--- VirtualBox api ---#
+
+virtualbox_url_prefix: 'https://download.virtualbox.org/virtualbox'
+
+virtualbox_url_version: '{{ virtualbox_url_prefix }}/{{ virtualbox_edition | upper }}.TXT'
+# virtualbox_url_version: http://10.10.10.10/soft/virtualbox/latest-stable.txt
+
+virtualbox_url_path_to_files: '{{ virtualbox_url_prefix }}/{{ virtualbox_available_version_fact }}'
+
+virtualbox_checksum_file_url: '{{ virtualbox_url_path_to_files }}/{{ virtualbox_checksum_algorithm | upper }}SUMS'
+# virtualbox_checksum_file_url: http://10.10.10.10/soft/virtualbox/latest-stable/SHA256SUMS
+
+virtualbox_windows_local_download_path: '{{ ansible_env.TMP }}\virtualbox'
+
+virtualbox_install_extension_pack: true
+# virtualbox_install_extension_pack: false
+
+# If the variable is defined - virtualbox will be downloaded from the specified location
+# virtualbox_direct_download_url: http://10.10.10.10/soft/virtualbox/latest-stable/virtualbox-latest.exe
+
+# If the variable is defined - extension pack will be downloaded from the specified location
+# virtualbox_extpack_direct_download_url: http://10.10.10.10/soft/virtualbox/latest-stable/oracle_vm_virtualbox_extension_pack-latest.vbox-extpack
 
 virtualbox_checksum_algorithm: sha256
 # virtualbox_checksum_algorithm: md5
+
+virtualbox_version: latest
+# virtualbox_version: 5.2.38
 
 #--- Other --#
 
@@ -69,19 +105,6 @@ http_or_https: http
 ```
 
 ## Dependencies
-
-Version one:
-
-```bash
-cd /path/to/you/ansible/roles
-git clone https://github.com/don-rumata/ansible-role-install-virtualbox
-```
-
-Version two:
-
-```bash
-ansible-galaxy install don_rumata.ansible_role_install_virtualbox
-```
 
 ### If you want deploy to Windows 7
 
@@ -109,7 +132,9 @@ git clone https://github.com/don-rumata/ansible-role-install-virtualbox don_ruma
 
 ## Example Playbook
 
-Install latest stable VirtualBox on Windows or Linux with Extension Pack:
+### I
+
+Install latest stable `VirtualBox` on Windows or Linux with `Extension Pack`:
 
 `install-virtualbox.yml`:
 
@@ -124,6 +149,32 @@ Install latest stable VirtualBox on Windows or Linux with Extension Pack:
   tasks:
 ```
 
+### II
+
+Install `VirtualBox` and `Extension Pack` from local web server:
+
+`install-virtualbox.yml`:
+
+```yaml
+---
+  - name: Install VirtualBox
+    hosts: all
+    strategy: free
+    serial:
+      - "100%"
+    roles:
+      - role: ansible-role-install-virtualbox
+        virtualbox_repo_deb_key:
+          - http://10.10.10.10/soft/virtualbox/oracle_vbox.asc
+          - http://10.10.10.10/soft/virtualbox/oracle_vbox_2016.asc
+        virtualbox_repo_rpm_key: http://10.10.10.10/soft/virtualbox/oracle_vbox.asc
+        virtualbox_url_version: http://10.10.10.10/soft/virtualbox/latest-stable.txt
+        virtualbox_checksum_file_url: http://10.10.10.10/soft/virtualbox/latest-stable/SHA256SUMS
+        virtualbox_extpack_direct_download_url: http://10.10.10.10/soft/virtualbox/latest-stable/oracle_vm_virtualbox_extension_pack-latest.vbox-extpack
+        virtualbox_direct_download_url: http://10.10.10.10/soft/virtualbox/latest-stable/virtualbox-latest.exe
+    tasks:
+```
+
 ## License
 
 Apache License, Version 2.0
@@ -136,7 +187,7 @@ Apache License, Version 2.0
 
 - Add tests.
 
-- Add support Fedora 32
+- Add support Fedora
 
 - ~~Add support openSUSE~~
 

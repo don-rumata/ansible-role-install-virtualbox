@@ -31,11 +31,9 @@
     # - ansible_pkg_mgr == 'apt'
     # - ansible_architecture == 'x86_64'
   become: yes
-  apt:
+  package:
     name: virtualbox-{{ virtualbox_available_major_and_minor_version_fact }}
     state: present
-    force: yes
-    install_recommends: yes
   notify:
     - run-vboxconfig
 
@@ -68,7 +66,7 @@
   when:
     - ansible_os_family == 'Suse'
   become: yes
-  zypper:
+  package:
     name:
       - virtualbox
     state: present

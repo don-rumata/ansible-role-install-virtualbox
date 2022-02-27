@@ -15,11 +15,5 @@
 - import_tasks: install-virtualbox.yml
 
 - import_tasks: download-extensionpack.yml
-  when:
-    - virtualbox_installed_extpack_numbers_fact == 0
-    - virtualbox_full_installed_extpack_version_fact != virtualbox_full_available_extpack_version_fact
 
 - import_tasks: install-extensionpack.yml
-  when:
-    - virtualbox_installed_extpack_numbers_fact == 0
-    - virtualbox_full_installed_extpack_version_fact != virtualbox_full_available_extpack_version_fact

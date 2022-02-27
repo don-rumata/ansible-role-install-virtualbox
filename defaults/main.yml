@@ -21,7 +21,7 @@ virtualbox_repo_deb_key:
 virtualbox_repo_rpm_key: https://www.virtualbox.org/download/oracle_vbox.asc
 # virtualbox_repo_rpm_key: http://10.10.10.10/soft/virtualbox/oracle_vbox.asc
 
-#--- VirtualBox api urls ---#
+#--- VirtualBox api ---#
 
 virtualbox_url_prefix: 'https://download.virtualbox.org/virtualbox'
 
@@ -33,20 +33,14 @@ virtualbox_url_path_to_files: '{{ virtualbox_url_prefix }}/{{ virtualbox_availab
 virtualbox_checksum_file_url: '{{ virtualbox_url_path_to_files }}/{{ virtualbox_checksum_algorithm | upper }}SUMS'
 # virtualbox_checksum_file_url: http://10.10.10.10/soft/virtualbox/latest-stable/SHA256SUMS
 
-#--- VirtualBox local download path ---#
-
 virtualbox_windows_local_download_path: '{{ ansible_env.TMP }}\virtualbox'
 
-#--- VirtualBox checksum algorithm ---#
+# virtualbox_extpack_direct_download_url: http://10.10.10.10/soft/virtualbox/latest-stable/oracle_vm_virtualbox_extension_pack-latest.vbox-extpack
 
 virtualbox_checksum_algorithm: sha256
-
 # virtualbox_checksum_algorithm: md5
 
-#--- VirtualBox version ---#
-
 virtualbox_version: latest
-
 # virtualbox_version: 5.2.38
 
 #--- Other --#

@@ -1,15 +1,101 @@
 ---
+# https://fixmypc.ru/post/powershell-replace-zamena-strok-v-tekste-i-faile/
+- name: Get facts about Extension Pack 4 Windows
+  when:
+    - ansible_os_family == 'Windows'
+  become: yes
+  become_method: runas
+  become_flags: logon_type=new_credentials logon_flags=netcredentials_only
+  win_shell: |
+    $for_yaml = VBoxManage list extpacks
+    $for_yaml -replace '^', '  ' -replace '  Extension', '- Extension'
+  register: vboxmanage_list_extpacks_windows
+  changed_when: vboxmanage_list_extpacks_windows.rc != 0
+
+#---
+
+# https://stackoverflow.com/q/57837867
+- name: Get facts about Extension Pack 4 Linux
+  when:
+    - ansible_system == 'Linux'
+  become: yes
+  shell: vboxmanage list extpacks | sed 's/^/  / ; s/  Extension/- Extension/'
+  register: vboxmanage_list_extpacks_linux
+  changed_when: vboxmanage_list_extpacks_linux.rc != 0
+
+# TODO. Я не знаю как сделать мЕньшим количеством кода, поэтому воткнул заглушку "plugobj".
+- name: Set facts about Extension Pack
+  vars:
+    plugobj:
+      plugkey: plugvalue
+  set_fact:
+    virtualbox_installed_extpack_info_linux_fact:
+      "{{ vboxmanage_list_extpacks_linux.stdout
+      | from_yaml
+      | default(plugobj) }}"
+    virtualbox_installed_extpack_info_windows_fact:
+      "{{ vboxmanage_list_extpacks_windows.stdout
+      | from_yaml
+      | default(plugobj) }}"
+
+# Оба варианта корректно работают. Оставил для примера.
+- set_fact:
+    # virtualbox_installed_extpack_info_fact:
+    #   "{{ virtualbox_installed_extpack_info_linux_fact
+    #   | combine(virtualbox_installed_extpack_info_windows_fact) }}"
+    virtualbox_installed_extpack_info_fact:
+      "{{ virtualbox_installed_extpack_info_windows_fact
+      | combine(virtualbox_installed_extpack_info_linux_fact) }}"
+
+- set_fact:
+    virtualbox_full_installed_extpack_version_fact:
+      "{{ virtualbox_installed_extpack_info_fact['Version'] }}.{{ virtualbox_installed_extpack_info_fact['Revision'] }}"
+  when: virtualbox_installed_extpack_info_fact['Extension Packs'] != 0
+
+# {
+#   "virtualbox_installed_extpack_info_fact": {
+#     "Extension Packs": 0,
+#     "plugkey": "plugvalue"
+#   }
+# }
+
+# {
+#   "virtualbox_installed_extpack_info_fact": [
+#     {
+#       "Description": "Oracle Cloud Infrastructure integration, USB 2.0 and USB 3.0 Host Controller, Host Webcam, VirtualBox RDP, PXE ROM, Disk Encryption, NVMe.",
+#       "Edition": null,
+#       "Extension Packs": 1,
+#       "Pack no. 0": "Oracle VM VirtualBox Extension Pack",
+#       "Revision": 149290,
+#       "Usable": true,
+#       "VRDE Module": "VBoxVRDP",
+#       "Version": "6.1.32",
+#       "Why unusable": null
+#     }
+#   ]
+# }
+
 - name: Create download directory 4 Windows
-  when: ansible_os_family == 'Windows'
+  when:
+    - ansible_os_family == 'Windows'
+    - virtualbox_installed_extpack_info_fact['Extension Packs'] == 0
+      or
+      virtualbox_full_installed_extpack_version_fact != virtualbox_full_available_extpack_version_fact
   become: yes
   become_method: runas
   become_flags: logon_type=new_credentials logon_flags=netcredentials_only
   win_file:
     path: '{{ virtualbox_windows_local_download_path }}'
     state: directory
+
 #---
+
 - name: Download VirtualBox Extension Pack 4 Windows
-  when: ansible_os_family == 'Windows'
+  when:
+    - ansible_os_family == 'Windows'
+    - virtualbox_installed_extpack_info_fact['Extension Packs'] == 0
+      or
+      virtualbox_full_installed_extpack_version_fact != virtualbox_full_available_extpack_version_fact
   become: yes
   become_method: runas
   become_flags: logon_type=new_credentials logon_flags=netcredentials_only
@@ -18,9 +104,15 @@
     dest: '{{ virtualbox_windows_local_download_path }}\{{ virtualbox_available_extpack_filename_fact }}'
     checksum: '{{ virtualbox_available_extpack_checksum_fact }}'
     checksum_algorithm: '{{ virtualbox_checksum_algorithm }}'
+
 #---
+
 - name: Download VirtualBox Extension Pack 4 Linux
-  when: ansible_system == 'Linux'
+  when:
+    - ansible_system == 'Linux'
+    - virtualbox_installed_extpack_info_fact['Extension Packs'] == 0
+      or
+      virtualbox_full_installed_extpack_version_fact != virtualbox_full_available_extpack_version_fact
   become: yes
   get_url:
     url: '{{ virtualbox_extpack_direct_download_url_fact }}'

@@ -85,7 +85,7 @@ virtualbox_windows_local_download_path: '{{ ansible_env.TMP }}\virtualbox'
 virtualbox_install_extension_pack: true
 # virtualbox_install_extension_pack: false
 
-# If the variable is defined - virtualbox will be downloaded from the specified location
+# If the variable is defined - virtualbox will be downloaded from the specified location (Windows only)
 # virtualbox_direct_download_url: http://10.10.10.10/soft/virtualbox/latest-stable/virtualbox-latest.exe
 
 # If the variable is defined - extension pack will be downloaded from the specified location

@@ -1,6 +1,6 @@
 # Ansible Role: Install VirtualBox
 
-[![License][license-image]][license-url] [![Ansible Galaxy][ansible-galaxy-image]][ansible-galaxy-url]
+[![License][license-image]][license-url] [![Ansible Galaxy][ansible-galaxy-image]][ansible-galaxy-url] [![Ansible Galaxy Quality][ansible-galaxy-quality-image]][ansible-galaxy-url] [![Ansible Galaxy Release][ansible-galaxy-release-image]][ansible-galaxy-url]
 
 Install [VirtualBox](https://virtualbox.org) for Linux and Windows with Extension Pack.
 
@@ -28,7 +28,11 @@ Install [VirtualBox](https://virtualbox.org) for Linux and Windows with Extensio
     - name: EL (CentOS)
       versions:
         - 8
-        - 7
+        # - 7
+    - name: opensuse
+      vesrion:
+        - tumbleweed
+        - 15.3
     - name: windows
       version:
         - 2008x64 (7 64bit)
@@ -38,7 +42,7 @@ Install [VirtualBox](https://virtualbox.org) for Linux and Windows with Extensio
 
 ## Requirements
 
-min_ansible_version: 2.7
+min_ansible_version: 2.9
 
 ## Role Variables
 
@@ -87,6 +91,22 @@ Download and install [Windows Management Framework 5.1](https://www.microsoft.co
 
 Quick config WinRM for Windows: <https://ru.stackoverflow.com/a/949971/191416>
 
+### How to install role
+
+Over `ansible-galaxy`:
+
+```bash
+ansible-galaxy install don_rumata.ansible_role_install_virtualbox
+```
+
+Over `bash+git`:
+
+```bash
+mkdir -p "$HOME/.ansible/roles"
+cd "$HOME/.ansible/roles"
+git clone https://github.com/don-rumata/ansible-role-install-virtualbox don_rumata.ansible_role_install_virtualbox
+```
+
 ## Example Playbook
 
 Install latest stable VirtualBox on Windows or Linux with Extension Pack:
@@ -100,7 +120,7 @@ Install latest stable VirtualBox on Windows or Linux with Extension Pack:
   serial:
     - "100%"
   roles:
-    - ansible-role-install-virtualbox
+    - don_rumata.ansible_role_install_virtualbox
   tasks:
 ```
 
@@ -118,7 +138,7 @@ Apache License, Version 2.0
 
 - Add support Fedora 32
 
-- Add support openSUSE.
+- ~~Add support openSUSE~~
 
 - Add support ArchLinux
 
@@ -129,3 +149,7 @@ Apache License, Version 2.0
 
 [ansible-galaxy-image]: https://img.shields.io/badge/ansible_galaxy-don__rumata.ansible__role__install__virtualbox-blue.svg
 [ansible-galaxy-url]: https://galaxy.ansible.com/don_rumata/ansible_role_install_virtualbox
+
+[ansible-galaxy-quality-image]: https://img.shields.io/ansible/quality/48593
+
+[ansible-galaxy-release-image]: https://img.shields.io/github/v/release/don-rumata/ansible-role-install-virtualbox.svg?include_prereleases

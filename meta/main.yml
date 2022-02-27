@@ -6,7 +6,7 @@ galaxy_info:
 
   license: Apache License, Version 2.0
 
-  min_ansible_version: 2.7
+  min_ansible_version: 2.9
 
   platforms:
     - name: Ubuntu
@@ -28,7 +28,11 @@ galaxy_info:
     - name: EL
       versions:
         - 8
-        - 7
+        # - 7
+    - name: opensuse
+      vesrion:
+        - tumbleweed
+        - 15.3
     - name: Windows
       version:
         - 2008x64
@@ -47,5 +51,7 @@ galaxy_info:
     - windows
     - windows7
     - windows10
+    - suse
+    - opensuse
 
   dependencies: []

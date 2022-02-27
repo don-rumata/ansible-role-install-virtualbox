@@ -25,19 +25,19 @@
 #     - repo
 #     - config
 
-# TODO
+# На 27-02-2022 всё ещё непонятно как добавлять репу, если Leap 15.3, а репа - 15.0. Городить дикие костыли не хочется, так что suse снова пролетает.
 # # https://ru.opensuse.org/SDB:%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0_VirtualBox
+# # http://download.virtualbox.org/virtualbox/rpm/opensuse/virtualbox.repo
 # - name: Add repo VirtualBox 4 OpenSUSE Tumbleweed
 #   when:
 #     - ansible_os_family == 'Suse'
-#     - ansible_distribution == 'openSUSE Tumbleweed'
-#     - ansible_pkg_mgr == 'zypper'
+#     - ansible_distribution != 'openSUSE Tumbleweed'
 #   become: yes
 #   block:
 #     - zypper_repository:
-#         # repo: http://download.virtualbox.org/virtualbox/rpm/opensuse/virtualbox.repo
+#         description: VirtualBox for openSUSE $releasever - $basearch
+#         repo: '{{ http_or_https }}://download.virtualbox.org/virtualbox/rpm/opensuse/$releasever/$basearch'
 #         name: virtualbox
-#         repo: http://download.virtualbox.org/virtualbox/rpm/opensuse/$releasever/$basearch
 #         auto_import_keys: yes
 #         state: present
 #   tags:

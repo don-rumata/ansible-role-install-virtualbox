@@ -22,12 +22,14 @@
     - win_file:
         path: '{{ virtualbox_windows_local_download_path }}'
         state: absent
+
 #---
+
 - name: Install VirtualBox 4 Debian\Ubuntu
   when:
     - ansible_os_family == 'Debian'
-    - ansible_pkg_mgr == 'apt'
-    - ansible_architecture == 'x86_64'
+    # - ansible_pkg_mgr == 'apt'
+    # - ansible_architecture == 'x86_64'
   become: yes
   apt:
     name: virtualbox-{{ virtualbox_available_major_and_minor_version_fact }}
@@ -36,40 +38,35 @@
     install_recommends: yes
   notify:
     - run-vboxconfig
+
 #---
-- name: Install VirtualBox 4 enterprise RHEL-like
+
+# depricated
+# - name: Install VirtualBox 4 enterprise RHEL-like
+#   when:
+#     - ansible_os_family == 'RedHat'
+#     - ansible_pkg_mgr == 'yum'
+#   become: yes
+#   vars:
+#     # https://stackoverflow.com/a/47091066/5430535
+#     # https://github.com/ansible/ansible/issues/32532#issuecomment-341641007
+#     ansible_python_interpreter: /usr/bin/python2.7
+#   yum:
+#     name:
+#       - VirtualBox-{{ virtualbox_available_major_and_minor_version_fact }}
+#     state: present
+#   notify:
+#     - run-vboxconfig
+
+#---
+
+- name: Install VirtualBox 4 openSUSE
   when:
-    - ansible_os_family == 'RedHat'
-    - ansible_pkg_mgr == 'yum'
+    - ansible_os_family == 'Suse'
   become: yes
-  vars:
-    # https://stackoverflow.com/a/47091066/5430535
-    # https://github.com/ansible/ansible/issues/32532#issuecomment-341641007
-    ansible_python_interpreter: /usr/bin/python2.7
-  yum:
+  zypper:
     name:
-      - VirtualBox-{{ virtualbox_available_major_and_minor_version_fact }}
+      - virtualbox
     state: present
   notify:
     - run-vboxconfig
-#---
-# TODO
-# - name: Install VirtualBox 4 OpenSUSE Tumbleweed
-#   when:
-#     - ansible_system == 'Linux'
-#     - ansible_os_family == 'Suse'
-#     - ansible_distribution == 'openSUSE Tumbleweed'
-#     - ansible_pkg_mgr == 'zypper'
-#   become: yes
-#   block:
-#     - package_facts:
-#     # Превращаем "1:7.2+60ubuntu1" в "7.2". Если на bash: LC_ALL=C aptitude show php | grep ^Version | awk '{print $2}' | cut -d ':' -f 2 | cut -d '+' -f 1
-#     - debug:
-#         msg: "{{ ansible_facts.packages['virtualbox'] }}" # [0].version.split(':')[1].split('+')[0] }}"
-#       register: virtualbox_installed_version
-#     - zypper:
-#         name:
-#           - virtualbox
-#         state: present
-#   # notify:
-#   #   - run-vboxconfig

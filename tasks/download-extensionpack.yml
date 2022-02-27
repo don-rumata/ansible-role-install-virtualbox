@@ -19,7 +19,7 @@
   when:
     - ansible_system == 'Linux'
   become: yes
-  shell: vboxmanage list extpacks | sed 's/^/  / ; s/  Extension/- Extension/'
+  shell: VBoxManage list extpacks | sed 's/^/  / ; s/  Extension/- Extension/'
   register: vboxmanage_list_extpacks_linux
   changed_when: vboxmanage_list_extpacks_linux.rc != 0
 

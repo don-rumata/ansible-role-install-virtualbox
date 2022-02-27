@@ -2,28 +2,26 @@
 - import_tasks: add-repo-4-debian-apt.yml
 - import_tasks: add-repo-4-redhat-yum.yml
 
-# TODO.
-# - name: Add repo VirtualBox 4 Fedora
-#   when: 
-#     - ansible_os_family == 'RedHat'
-#     - ansible_pkg_mgr == 'dnf'
-#   become: yes
-#   block:
-#     - yum_repository:
-#         file: virtualbox
-#         name: virtualbox
-#         description: Fedora $releasever - $basearch
-#         baseurl: '{{ http_or_https }}://download.virtualbox.org/virtualbox/rpm/fedora/$releasever/$basearch'
-#         gpgkey: https://www.virtualbox.org/download/oracle_vbox.asc
-#         enabled: yes
-#         gpgcheck: yes
-#         state: present
-#   tags:
-#     - linux
-#     - fedora
-#     - virtualbox
-#     - repo
-#     - config
+- name: Add repo VirtualBox 4 CentOS 8\Fedora
+  when: 
+    - ansible_os_family == 'RedHat'
+    - ansible_pkg_mgr == 'dnf'
+  become: yes
+  yum_repository:
+    description: Oracle Linux / RHEL / CentOS-$releasever / $basearch - VirtualBox
+    file: virtualbox
+    name: virtualbox
+    baseurl: '{{ http_or_https }}://download.virtualbox.org/virtualbox/rpm/rhel/$releasever/$basearch'
+    gpgkey: "{{ virtualbox_repo_rpm_key }}"
+    enabled: yes
+    gpgcheck: yes
+    state: present
+  tags:
+    - linux
+    - fedora
+    - virtualbox
+    - repo
+    - config
 
 # На 27-02-2022 всё ещё непонятно как добавлять репу, если Leap 15.3, а репа - 15.0. Городить дикие костыли не хочется, так что suse снова пролетает.
 # # https://ru.opensuse.org/SDB:%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0_VirtualBox

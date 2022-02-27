@@ -41,22 +41,26 @@
 
 #---
 
-# depricated
-# - name: Install VirtualBox 4 enterprise RHEL-like
-#   when:
-#     - ansible_os_family == 'RedHat'
-#     - ansible_pkg_mgr == 'yum'
-#   become: yes
-#   vars:
-#     # https://stackoverflow.com/a/47091066/5430535
-#     # https://github.com/ansible/ansible/issues/32532#issuecomment-341641007
-#     ansible_python_interpreter: /usr/bin/python2.7
-#   yum:
-#     name:
-#       - VirtualBox-{{ virtualbox_available_major_and_minor_version_fact }}
-#     state: present
-#   notify:
-#     - run-vboxconfig
+- name: Install VirtualBox 4 enterprise RHEL-like
+  when:
+    - ansible_os_family == 'RedHat'
+  become: yes
+  block:
+    - package:
+        name:
+          - gcc
+          - kernel-devel
+          - kernel-headers
+          - make
+          - perl
+          - elfutils-libelf-devel
+          - VirtualBox-{{ virtualbox_available_major_and_minor_version_fact }}
+        state: present
+      register: vbox_install
+    - command: vboxconfig
+      when: vbox_install.changed
+  # notify:
+  #   - run-vboxconfig
 
 #---
 

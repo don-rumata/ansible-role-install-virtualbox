@@ -11,9 +11,11 @@
 - name: Set facts about available virtualbox version part 1
   block:
     - set_fact:
-        virtualbox_available_version_fact: "{{ virtualbox_available_version.content | trim }}"
+        virtualbox_available_version_fact:
+          "{{ virtualbox_available_version.content | trim }}"
     - set_fact:
-        virtualbox_available_major_and_minor_version_fact: "{{ virtualbox_available_version_fact.split('.', 2)[:-1] | join('.') }}"
+        virtualbox_available_major_and_minor_version_fact:
+          "{{ virtualbox_available_version_fact.split('.', 2)[:-1] | join('.') }}"
 
 #---
 
@@ -28,18 +30,26 @@
 
 - name: Set facts about available virtualbox version part 2
   vars:
-    virtualbox_extpack_direct_download_url_var: "{{ virtualbox_url_path_to_files + '/' + virtualbox_available_extpack_filename_fact }}"
+    virtualbox_extpack_direct_download_url_var:
+      "{{ virtualbox_url_path_to_files + '/' + virtualbox_available_extpack_filename_fact }}"
   block:
     - set_fact:
-        virtualbox_available_extpack_filename_fact: '{{ (virtualbox_checksum_file_content.content | regex_findall(".*vbox-extpack"))[0].split("*")[1] }}'
+        virtualbox_available_extpack_filename_fact:
+          '{{ (virtualbox_checksum_file_content.content
+          | regex_findall(".*vbox-extpack"))[0].split("*")[1] }}'
     - set_fact:
-        virtualbox_available_extpack_checksum_fact: '{{ (virtualbox_checksum_file_content.content | regex_findall(".*vbox-extpack"))[0].split("*")[0] }}'
+        virtualbox_available_extpack_checksum_fact:
+          '{{ (virtualbox_checksum_file_content.content
+          | regex_findall(".*vbox-extpack"))[0].split("*")[0] | trim }}'
     - set_fact:
-        virtualbox_available_private_version_fact: '{{ virtualbox_available_extpack_filename_fact.split("-")[2].split(".")[0] }}'
+        virtualbox_available_private_version_fact:
+          '{{ virtualbox_available_extpack_filename_fact.split("-")[2].split(".")[0] }}'
     - set_fact:
-        virtualbox_full_available_version_fact: '{{ virtualbox_available_version_fact }}.{{ virtualbox_available_private_version_fact }}'
+        virtualbox_full_available_version_fact:
+          '{{ virtualbox_available_version_fact }}.{{ virtualbox_available_private_version_fact }}'
     - set_fact:
-        virtualbox_full_available_extpack_version_fact: '{{ virtualbox_full_available_version_fact }}'
+        virtualbox_full_available_extpack_version_fact:
+          '{{ virtualbox_full_available_version_fact }}'
     - set_fact:
         virtualbox_extpack_direct_download_url_fact:
           "{{ virtualbox_extpack_direct_download_url
@@ -50,13 +60,21 @@
 - name: Set facts about Windows only VirtualBox info
   when: ansible_os_family == 'Windows'
   vars:
-    virtualbox_direct_download_url_var: "{{ virtualbox_url_path_to_files + '/' + virtualbox_installer_file_fact }}"
+    virtualbox_direct_download_url_var:
+      "{{ virtualbox_url_path_to_files + '/' + virtualbox_installer_file_fact | default('') }}"
   block:
     - set_fact:
-        virtualbox_installer_file_fact: '{{ (virtualbox_checksum_file_content.content | regex_findall(".*exe"))[0].split("*")[1] }}'
-        virtualbox_installer_file_checksum_fact: '{{ (virtualbox_checksum_file_content.content | regex_findall(".*exe"))[0].split("*")[0] }}'
-        virtualbox_win_path_to_exe_fact: '{{ ansible_env.ProgramFiles }}\Oracle\VirtualBox\VirtualBox.exe'
-        virtualbox_direct_download_url_fact: '{{ virtualbox_direct_download_url | default(virtualbox_direct_download_url_var) }}'
+        virtualbox_installer_file_fact:
+          '{{ (virtualbox_checksum_file_content.content
+          | regex_findall(".*exe"))[0].split("*")[1] }}'
+        virtualbox_installer_file_checksum_fact:
+          '{{ (virtualbox_checksum_file_content.content
+          | regex_findall(".*exe"))[0].split("*")[0] }}'
+        virtualbox_win_path_to_exe_fact:
+          '{{ ansible_env.ProgramFiles }}\Oracle\VirtualBox\VirtualBox.exe'
+        virtualbox_direct_download_url_fact:
+          '{{ virtualbox_direct_download_url
+          | default(virtualbox_direct_download_url_var) }}'
 
 #---
 
@@ -95,7 +113,8 @@
         virtualbox_exe_state_fact: absent
       when: virtualbox_exe.stat.exists == false
     - set_fact:
-        virtualbox_exe_version_fact: "{{ virtualbox_exe_file_version.win_file_version.product_version }}"
+        virtualbox_exe_version_fact:
+          "{{ virtualbox_exe_file_version.win_file_version.product_version }}"
       when:
         - virtualbox_exe.stat.exists == true
         - virtualbox_exe_state_fact == 'present'

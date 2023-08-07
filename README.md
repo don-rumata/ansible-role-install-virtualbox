@@ -201,6 +201,6 @@ Apache License, Version 2.0
 [ansible-galaxy-image]: https://img.shields.io/badge/ansible_galaxy-don__rumata.ansible__role__install__virtualbox-blue.svg
 [ansible-galaxy-url]: https://galaxy.ansible.com/don_rumata/ansible_role_install_virtualbox
 
-[ansible-galaxy-quality-image]: https://img.shields.io/ansible/quality/48593
+[ansible-galaxy-quality-image]: https://img.shields.io/ansible/quality/62939
 
 [ansible-galaxy-release-image]: https://img.shields.io/github/v/release/don-rumata/ansible-role-install-virtualbox.svg?include_prereleases

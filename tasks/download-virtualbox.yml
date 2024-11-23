@@ -2,7 +2,7 @@
 - name: Download VirtualBox 4 Windows
   when:
     - ansible_os_family == 'Windows'
-  become: yes
+  become: true
   become_method: runas
   become_flags: logon_type=new_credentials logon_flags=netcredentials_only
   block:

@@ -3,7 +3,7 @@
 - name: Get facts about Extension Pack 4 Windows
   when:
     - ansible_os_family == 'Windows'
-  become: yes
+  become: true
   become_method: runas
   become_flags: logon_type=new_credentials logon_flags=netcredentials_only
   win_shell: |
@@ -18,7 +18,7 @@
 - name: Get facts about Extension Pack 4 Linux
   when:
     - ansible_system == 'Linux'
-  become: yes
+  become: true
   shell: VBoxManage list extpacks | sed 's/^/  / ; s/  Extension/- Extension/'
   register: vboxmanage_list_extpacks_linux
   changed_when: vboxmanage_list_extpacks_linux.rc != 0
@@ -81,7 +81,7 @@
     - virtualbox_installed_extpack_info_fact['Extension Packs'] == 0
       or
       virtualbox_full_installed_extpack_version_fact != virtualbox_full_available_extpack_version_fact
-  become: yes
+  become: true
   become_method: runas
   become_flags: logon_type=new_credentials logon_flags=netcredentials_only
   win_file:
@@ -96,7 +96,7 @@
     - virtualbox_installed_extpack_info_fact['Extension Packs'] == 0
       or
       virtualbox_full_installed_extpack_version_fact != virtualbox_full_available_extpack_version_fact
-  become: yes
+  become: true
   become_method: runas
   become_flags: logon_type=new_credentials logon_flags=netcredentials_only
   win_get_url:
@@ -113,7 +113,7 @@
     - virtualbox_installed_extpack_info_fact['Extension Packs'] == 0
       or
       virtualbox_full_installed_extpack_version_fact != virtualbox_full_available_extpack_version_fact
-  become: yes
+  become: true
   get_url:
     url: '{{ virtualbox_extpack_direct_download_url_fact }}'
     dest: '/tmp/{{ virtualbox_available_extpack_filename_fact }}'

@@ -4,7 +4,7 @@
     - ansible_os_family == 'Windows'
     - ansible_env.PROCESSOR_ARCHITECTURE == 'AMD64'
     - virtualbox_full_available_version_fact != virtualbox_exe_version_fact
-  become: yes
+  become: true
   become_method: runas
   become_flags: logon_type=new_credentials logon_flags=netcredentials_only
   block:
@@ -30,7 +30,7 @@
     - ansible_os_family == 'Debian'
     # - ansible_pkg_mgr == 'apt'
     # - ansible_architecture == 'x86_64'
-  become: yes
+  become: true
   package:
     name: virtualbox-{{ virtualbox_available_major_and_minor_version_fact }}
     state: present
@@ -42,7 +42,7 @@
 - name: Install VirtualBox 4 enterprise RHEL-like
   when:
     - ansible_os_family == 'RedHat'
-  become: yes
+  become: true
   block:
     - package:
         name:
@@ -65,7 +65,7 @@
 - name: Install VirtualBox 4 openSUSE
   when:
     - ansible_os_family == 'Suse'
-  become: yes
+  become: true
   package:
     name:
       - virtualbox

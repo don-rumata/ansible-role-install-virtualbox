@@ -2,7 +2,7 @@
 - name: Get VirtualBox available version
   uri:
     url: '{{ virtualbox_url_version }}'
-    return_content: yes
+    return_content: true
   delegate_to: localhost
   register: virtualbox_available_version
 
@@ -22,7 +22,7 @@
 - name: Get VirtualBox checksum content
   uri:
     url: '{{ virtualbox_checksum_file_url }}'
-    return_content: yes
+    return_content: true
   register: virtualbox_checksum_file_content
   delegate_to: localhost
 
@@ -80,7 +80,7 @@
 
 - name: Get VirtualBox exe version
   when: ansible_os_family == 'Windows'
-  become: yes
+  become: true
   become_method: runas
   become_flags: logon_type=new_credentials logon_flags=netcredentials_only
   block:

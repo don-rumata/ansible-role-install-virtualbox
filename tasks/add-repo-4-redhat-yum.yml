@@ -3,15 +3,15 @@
   when:
     - ansible_os_family == 'RedHat'
     - ansible_pkg_mgr == 'yum'
-  become: yes
+  become: true
   yum_repository:
     file: virtualbox
     name: virtualbox
     description: Oracle Linux / RHEL / CentOS-$releasever / $basearch - VirtualBox
     baseurl: '{{ http_or_https }}://download.virtualbox.org/virtualbox/rpm/el/$releasever/$basearch'
     gpgkey: "{{ virtualbox_repo_rpm_key }}"
-    enabled: yes
-    gpgcheck: yes
+    enabled: true
+    gpgcheck: true
     state: present
   tags:
     - linux

@@ -7,7 +7,7 @@
     - virtualbox_installed_extpack_info_fact['Extension Packs'] == 0
       or
       virtualbox_full_installed_extpack_version_fact != virtualbox_full_available_extpack_version_fact
-  become: yes
+  become: true
   become_method: runas
   become_flags: logon_type=new_credentials logon_flags=netcredentials_only
   block:
@@ -21,7 +21,7 @@
     - virtualbox_installed_extpack_info_fact['Extension Packs'] == 0
       or
       virtualbox_full_installed_extpack_version_fact != virtualbox_full_available_extpack_version_fact
-  become: yes
+  become: true
   block:
     - shell: yes | VBoxManage extpack install --replace /tmp/{{ virtualbox_available_extpack_filename_fact }}
     - file:

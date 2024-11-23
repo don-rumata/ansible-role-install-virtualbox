@@ -6,15 +6,15 @@
   when: 
     - ansible_os_family == 'RedHat'
     - ansible_pkg_mgr == 'dnf'
-  become: yes
+  become: true
   yum_repository:
     description: Oracle Linux / RHEL / CentOS-$releasever / $basearch - VirtualBox
     file: virtualbox
     name: virtualbox
     baseurl: '{{ http_or_https }}://download.virtualbox.org/virtualbox/rpm/rhel/$releasever/$basearch'
     gpgkey: "{{ virtualbox_repo_rpm_key }}"
-    enabled: yes
-    gpgcheck: yes
+    enabled: true
+    gpgcheck: true
     state: present
   tags:
     - linux
@@ -30,13 +30,13 @@
 #   when:
 #     - ansible_os_family == 'Suse'
 #     - ansible_distribution != 'openSUSE Tumbleweed'
-#   become: yes
+#   become: true
 #   block:
 #     - zypper_repository:
 #         description: VirtualBox for openSUSE $releasever - $basearch
 #         repo: '{{ http_or_https }}://download.virtualbox.org/virtualbox/rpm/opensuse/$releasever/$basearch'
 #         name: virtualbox
-#         auto_import_keys: yes
+#         auto_import_keys: true
 #         state: present
 #   tags:
 #     - linux

@@ -4,8 +4,8 @@
   when:
     - ansible_os_family == 'Debian'
     - ansible_pkg_mgr == 'apt'
-  become: yes
+  become: true
   apt:
-    update_cache: yes
-    # force: yes
+    update_cache: true
+    # force: true
     cache_valid_time: 86400 # One day
